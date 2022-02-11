@@ -1,0 +1,8 @@
+fail-on-severity: low
+ignore:
+  # ignore issues that are still being evaluated or disputed
+  - fix-state: unknown
+  # ignore issues where vendors declare it is developers responsibility or misusage
+  - fix-state: wont-fix
+  # ignore issues that have no fix yet released (action required on upstream provider)
+  - fix-state: not-fixed
