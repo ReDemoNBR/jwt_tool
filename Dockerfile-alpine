@@ -5,6 +5,7 @@ WORKDIR /opt/jwt_tool
 COPY jwt_tool.py LICENSE requirements.txt ./
 
 RUN \
+    apk upgrade --update --no-cache && \
     # install build dependencies
     apk add --no-cache --virtual .build-deps build-base && \
     pip install --no-cache-dir -r requirements.txt && \
