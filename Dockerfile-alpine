@@ -1,0 +1,21 @@
+FROM python:3-alpine
+
+WORKDIR /opt/jwt_tool
+
+COPY jwt_tool.py LICENSE requirements.txt ./
+
+RUN \
+    # install build dependencies
+    apk add --no-cache --virtual .build-deps build-base && \
+    pip install --no-cache-dir -r requirements.txt && \
+    # remove build dependencies
+    apk del .build-deps && \
+    chmod +x jwt_tool.py && \
+    ln -s /opt/jwt_tool/jwt_tool.py /usr/local/bin/jwt-tool && \
+    ln -s jwt-tool /usr/local/bin/jwt_tool && \
+    # generate initial config
+    jwt-tool --bare || echo "generated initial config"
+
+ENTRYPOINT ["jwt-tool"]
+
+CMD ["-h"]
