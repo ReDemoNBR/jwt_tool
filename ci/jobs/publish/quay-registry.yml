@@ -1,0 +1,24 @@
+publish:quay-registry:
+  stage: publish
+  dependencies: []
+  tags:
+    - rdnxk
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      when: never
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        SOURCE_REPO: $OCI_REGISTRY/$CI_PROJECT_PATH/$CI_PIPELINE_ID
+  variables:
+    DEST_REPO_NAME: $CI_PROJECT_PATH
+    DEST_REPO: $OCI_REGISTRY/$DEST_REPO_NAME
+  before_script:
+    - skopeo login --username $OCI_REGISTRY_USER --password $OCI_REGISTRY_PASSWORD $OCI_REGISTRY
+  script:
+    - tags=$(skopeo list-tags "docker://$SOURCE_REPO" | jq -r ".Tags[]")
+    - |
+      for tag in $tags; do
+        skopeo copy --all --preserve-digests "docker://$SOURCE_REPO:$tag" "docker://$DEST_REPO:$tag"
+      done
+    - make readme
+    - sh utils/update-description.sh "$DEST_REPO_NAME" .tmp/README.md

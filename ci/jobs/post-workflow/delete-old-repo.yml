@@ -1,0 +1,9 @@
+delete-old-repo:
+  stage: .post
+  dependencies: []
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+  variables:
+    REPOSITORY_NAME: $CI_PROJECT_PATH/$CI_PIPELINE_ID
+  script:
+    - sh utils/delete-repo.sh "$REPOSITORY_NAME"

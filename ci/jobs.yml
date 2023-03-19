@@ -1,0 +1,14 @@
+include:
+  ## Lint jobs
+  - "ci/jobs/lint/hadolint.yml"
+  - "ci/jobs/lint/yamllint.yml"
+  ## Build jobs
+  - "ci/jobs/build/container.yml"
+  ## Audit jobs
+  - "ci/jobs/audit/grype.yml"
+  - "ci/jobs/audit/secret-detection-gitlab.yml"
+  ## Publish to container registry
+  - "ci/jobs/publish/docker-hub.yml"
+  - "ci/jobs/publish/quay-registry.yml"
+  ## Post workflow
+  - "ci/jobs/post-workflow/delete-old-repo.yml"

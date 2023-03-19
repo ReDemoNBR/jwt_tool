@@ -1,0 +1,41 @@
+build:
+  stage: build
+  tags:
+    - rdnxk
+    - container-builder
+  variables:
+    TAG_SUFFIX: ""
+    TAG_DEFAULT: bullseye
+    __BUILD_OPTS: "--squash --jobs 7"
+    BUILD_OPTS: "$__BUILD_OPTS"
+    STORAGE_DRIVER: overlay
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+      variables:
+        # Automatically delete image from remote after 1w
+        BUILD_OPTS: "$__BUILD_OPTS --label quay.expires-after=1w"
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        REPOSITORY_NAME: $CI_PROJECT_NAMESPACE/jwt_tool/$CI_PIPELINE_IID
+        REMOTE_IMAGE_REPO: $OCI_REGISTRY/$REPOSITORY_NAME
+  before_script:
+    - podman login --username $OCI_REGISTRY_USER --password $OCI_REGISTRY_PASSWORD $OCI_REGISTRY
+    - cosign login --username $OCI_REGISTRY_USER --password $OCI_REGISTRY_PASSWORD $OCI_REGISTRY
+  script:
+    - make build
+    - make push
+    - make sign
+    - make sbom
+    - make artifacts
+    - sh utils/update-description.sh $REPOSITORY_NAME .tmp/README.md
+    - sh utils/change-repo-visibility.sh $REPOSITORY_NAME public
+  after_script:
+    - |
+      if [[ "$CI_COMMIT_BRANCH" == "$CI_DEFAULT_BRANCH" ]]; then
+        skopeo login --username $OCI_REGISTRY_USER --password $OCI_REGISTRY_PASSWORD $OCI_REGISTRY
+        skopeo copy --all docker://$REMOTE_IMAGE_REPO:$TAG_SUFFIX docker://$REMOTE_IMAGE_REPO:latest
+      fi
+  parallel:
+    matrix:
+      - TAG_SUFFIX: alpine
+      - TAG_SUFFIX: bullseye

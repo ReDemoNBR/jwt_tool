@@ -1,0 +1,46 @@
+audit:grype:
+  stage: audit
+  dependencies: []
+  rules:
+    - if: $CI_COMMIT_BRANCH != $CI_DEFAULT_BRANCH
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+      variables:
+        REMOTE_IMAGE_REPO: $OCI_REGISTRY/$CI_PROJECT_PATH/$CI_PIPELINE_ID
+  variables:
+    TAG: alpine
+    ARCH: amd64
+    PLATFORM: linux/amd64
+    GRYPE_REGISTRY_AUTH_AUTHORITY: $OCI_REGISTRY
+    GRYPE_REGISTRY_AUTH_USERNAME: $OCI_REGISTRY_USER
+    GRYPE_REGISTRY_AUTH_PASSWORD: $OCI_REGISTRY_PASSWORD
+    GRYPE_FILE: grype-$TAG-$ARCH-$CI_COMMIT_SHORT_SHA
+    SYFT_FILE: syft-sbom-$TAG-$ARCH-$CI_COMMIT_SHORT_SHA
+  before_script:
+    - cosign login --username $OCI_REGISTRY_USER --password $OCI_REGISTRY_PASSWORD $OCI_REGISTRY
+    # skopeo is required for get-digest.sh script
+    - skopeo login --username $OCI_REGISTRY_USER --password $OCI_REGISTRY_PASSWORD $OCI_REGISTRY
+  script:
+    - ARCH="${PLATFORM#linux/}"
+    - ARCH="${ARCH//\//""}"
+    - digest="$(sh utils/get-digest.sh "$REMOTE_IMAGE_REPO:$TAG" "$PLATFORM")"
+    - cosign verify --attachment sbom --key $COSIGN_PUBLIC_KEY $REMOTE_IMAGE_REPO@$digest
+    # yamllint disable-line rule:line-length
+    - cosign download sbom --platform $PLATFORM --output-file $SYFT_FILE.json $REMOTE_IMAGE_REPO:$TAG
+    - syft convert $SYFT_FILE.json > $SYFT_FILE.txt
+    - grype --file $GRYPE_FILE.txt sbom:./$SYFT_FILE.json
+  artifacts:
+    paths:
+      - $GRYPE_FILE.txt
+      - $SYFT_FILE.json
+      - $SYFT_FILE.txt
+    expire_in: 30 days
+    when: always
+    public: true
+  parallel:
+    matrix:
+      - ARCH: [alpine, bullseye]
+        PLATFORM: [
+          linux/386, linux/amd64,
+          linux/arm/v5, linux/arm/v7, linux/arm64/v8,
+          linux/ppc64le, linux/s390x
+        ]

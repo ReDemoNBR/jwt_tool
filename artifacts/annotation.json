@@ -1,0 +1,14 @@
+{
+    "cosign.pub": {
+        "org.opencontainers.image.title": "cosign.pub",
+        "org.opencontainers.image.created": "1970-01-01T00:00:00.000Z"
+    },
+    "LICENSE.md": {
+        "org.opencontainers.image.title": "LICENSE.md",
+        "org.opencontainers.image.created": "1970-01-01T00:00:00.000Z"
+    },
+    "README.md": {
+        "org.opencontainers.image.title": "README.md",
+        "org.opencontainers.image.created": "1970-01-01T00:00:00.000Z"
+    }
+}

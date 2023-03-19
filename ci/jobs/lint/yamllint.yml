@@ -1,0 +1,5 @@
+yamllint:
+  stage: test
+  image: sdesbure/yamllint
+  script:
+    - yamllint --strict ./

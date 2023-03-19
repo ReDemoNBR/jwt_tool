@@ -1,0 +1,5 @@
+hadolint:
+  stage: test
+  image: hadolint/hadolint:latest-alpine
+  script:
+    - find ./ -type f -name "Containerfile*" | xargs hadolint

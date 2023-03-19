@@ -1,5 +1,51 @@
+## Supported tags and `Containerfile` links
+
+-   [`2.2.6-bullseye`, `2.2-bullseye`, `2-bullseye`, `2.2.6`, `2.2`, `2`, `bullseye`, `latest`](https://github.com/ReDemoNBR/jwt_tool/blob/master/container/debian/Containerfile)
+-   [`2.2.6-alpine`, `2.2-alpine`, `2-alpine`, `alpine`](https://github.com/ReDemoNBR/jwt_tool/blob/master/container/alpine/Containerfile)
+
+## Image Variants
+### \<version> | \<version>-bullseye
+This is the defacto image. If you are unsure about what your needs are, you probably want to use this one.
+These images are based on Bullseye release of Debian.
+
+### \<version>-alpine
+This image is based on the popular [Alpine Linux](https://alpinelinux.org/) which is much smaller than most distribution base images (~5MB), and thus leads to much slimmer images in general.
+
+## Source of these images
+-   Repository: <https://gitlab.com/rdnxk/jwt_tool>
+-   Issues: <https://gitlab.com/rdnxk/jwt_tool/-/issues>
+
+These images are automatically updated on a weekly basis.
+Attestations, SBOM and Signatures are attached to the image digests:
+-   **Attestation**: Attestation predicate is attached with [SPDX](https://spdx.dev) in JSON (`application/spdx+json`) format. SPDX is an open standard widely used for software package data exchange
+-   **SBOM**: SBOM is attached with [Syft](https://github.com/anchore/syft) in JSON (`application/vnd.syft+json`) format. Syft SBOMs are good for using in conjunction with [Grype](https://github.com/anchore/grype) for vulnerability scanning
+
+### OCI Artifacts
+Other OCI artifacts are pushed to this repository. They include the License, Public Key and README with the following tags
+-   **license**: Refer to the latest license
+-   **license_\<DATE>**: Refer to the license that was pushed at specified `DATE` datetime. Useful if the latest license was updated
+-   **publickey**: Refer to the latest public key
+-   **publickey_\<DATE>**: Refer to the public key that was pushed at specified `DATE` datetime. Useful when the keys used to sign the old image and artificats got rotated
+-   **readme**: Refer to the lastest README
+-   **readme_\<DATE>**: Refer to the README that was pushed at the specified `DATE` datetime. Useful if the latest README was updated.
+
+The public keys can be used to validate the authenticity of the images and artifacts. They can be used as below
+```bash
+## Display signatures and artifacts related to image
+$ cosign triangulate docker.io/redemonbr/podman-steroids:latest
+$ cosign tree docker.io/redemonbr/podman-steroids:latest
+
+## Pulls/Downloads the public key (it will be saved as cosign.pub)
+$ oras pull docker.io/redemonbr/podman-steroids:publickey
+## Verify image (via manifest/tag or digest), SBOM and attestation
+$ cosign verify --key cosign.pub docker.io/redemonbr/podman-steroids:latest
+$ cosign verify --key cosign.pub docker.io/redemonbr/podman-steroids@sha256:...
+$ cosign verify --attachment sbom --key cosign.pub docker.io/redemonbr/podman-steroids@sha256:...
+$ cosign verify-attestation --type spdxjson --key cosign.pub docker.io/redemonbr/podman-steroids@sha256:...
+```
+
 # The JSON Web Token Toolkit v2
->*jwt_tool.py* is a toolkit for validating, forging, scanning and tampering JWTs (JSON Web Tokens).  
+>*jwt_tool.py* is a toolkit for validating, forging, scanning and tampering JWTs (JSON Web Tokens).
 
 ![jwt_tool version](https://img.shields.io/badge/version-v2.2.6-blue) ![python version](https://img.shields.io/badge/python-v3.6+-green)
 
@@ -25,34 +71,34 @@ Its functionality includes:
 ---
 
 ## Audience
-This tool is written for **pentesters**, who need to check the strength of the tokens in use, and their susceptibility to known attacks. A range of tampering, signing and verifying options are available to help delve deeper into the potential weaknesses present in some JWT libraries.  
-It has also been successful for **CTF challengers** - as CTFs seem keen on JWTs at present.  
+This tool is written for **pentesters**, who need to check the strength of the tokens in use, and their susceptibility to known attacks. A range of tampering, signing and verifying options are available to help delve deeper into the potential weaknesses present in some JWT libraries.
+It has also been successful for **CTF challengers** - as CTFs seem keen on JWTs at present.
 It may also be useful for **developers** who are using JWTs in projects, but would like to test for stability and for known vulnerabilities when using forged tokens.
 
 ---
 
 ## Requirements
-This tool is written natively in **Python 3** (version 3.6+) using the common libraries, however various cryptographic funtions (and general prettiness/readability) do require the installation of a few common Python libraries.  
+This tool is written natively in **Python 3** (version 3.6+) using the common libraries, however various cryptographic funtions (and general prettiness/readability) do require the installation of a few common Python libraries.
 *(An older Python 2.x version of this tool is available on the legacy branch for those who need it, although this is no longer be supported or updated)*
 
 ---
 
 ## Installation
-Installation is just a case of downloading the `jwt_tool.py` file (or `git clone` the repo).  
+Installation is just a case of downloading the `jwt_tool.py` file (or `git clone` the repo).
 (`chmod` the file too if you want to add it to your *$PATH* and call it from anywhere.)
 
-`$ git clone https://github.com/ticarpi/jwt_tool`  
-`$ python3 -m pip install termcolor cprint pycryptodomex requests`  
+`$ git clone https://github.com/ticarpi/jwt_tool`
+`$ python3 -m pip install termcolor cprint pycryptodomex requests`
 
-On first run the tool will generate a config file, some utility files, logfile, and a set of Public and Private keys in various formats.  
+On first run the tool will generate a config file, some utility files, logfile, and a set of Public and Private keys in various formats.
 
 ### Custom Configs
-* To make best use of the scanning options it is **strongly advised** to copy the custom-generated JWKS file somewhere that can be accessed remotely via a URL. This address should then be stored in `jwtconf.ini` as the "jwkloc" value.  
-* In order to capture external service interactions - such as DNS lookups and HTTP requests - put your unique address for Burp Collaborator (or other alternative tools such as RequestBin) into the config file as the "httplistener" value.  
+* To make best use of the scanning options it is **strongly advised** to copy the custom-generated JWKS file somewhere that can be accessed remotely via a URL. This address should then be stored in `jwtconf.ini` as the "jwkloc" value.
+* In order to capture external service interactions - such as DNS lookups and HTTP requests - put your unique address for Burp Collaborator (or other alternative tools such as RequestBin) into the config file as the "httplistener" value.
 ***Review the other options in the config file to customise your experience.***
 
 ### Colour bug in Windows
-To fix broken colours in Windows cmd/Powershell: uncomment the below two lines in `jwt_tool.py` (remove the "# " from the beginning of each line)  
+To fix broken colours in Windows cmd/Powershell: uncomment the below two lines in `jwt_tool.py` (remove the "# " from the beginning of each line)
 You will also need to install colorama: `python3 -m pip install colorama`
 ```
 # import colorama
@@ -61,36 +107,36 @@ You will also need to install colorama: `python3 -m pip install colorama`
 ---
 
 ## Usage
-The first argument should be the JWT itself (*unless providing this in a header or cookie value*). Providing no additional arguments will show you the decoded token values for review.  
-`$ python3 jwt_tool.py <JWT>`  
+The first argument should be the JWT itself (*unless providing this in a header or cookie value*). Providing no additional arguments will show you the decoded token values for review.
+`$ python3 jwt_tool.py <JWT>`
 
-The toolkit will validate the token and list the header and payload values.  
+The toolkit will validate the token and list the header and payload values.
 
 ### Additional arguments
-The many additional arguments will take you straight to the appropriate function and return you a token ready to use in your tests.  
-For example, to tamper the existing token run the following:  
-`$ python3 jwt_tool.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.aqNCvShlNT9jBFTPBpHDbt2gBB1MyHiisSDdp8SQvgw -T`  
+The many additional arguments will take you straight to the appropriate function and return you a token ready to use in your tests.
+For example, to tamper the existing token run the following:
+`$ python3 jwt_tool.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.aqNCvShlNT9jBFTPBpHDbt2gBB1MyHiisSDdp8SQvgw -T`
 
-Many options need additional values to set options.  
-For example, to run a particular type of exploit you need to choose the eXploit (-X) option and select the vulnerability (here using "a" for the *alg:none* exploit):  
+Many options need additional values to set options.
+For example, to run a particular type of exploit you need to choose the eXploit (-X) option and select the vulnerability (here using "a" for the *alg:none* exploit):
 `$ python3 jwt_tool.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.aqNCvShlNT9jBFTPBpHDbt2gBB1MyHiisSDdp8SQvgw -X a`
 
 ### Extra parameters
-Some options such as Verifying tokens require additional parameters/files to be provided (here providing the Public Key in PEM format):  
-`$ python3 jwt_tool.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.aqNCvShlNT9jBFTPBpHDbt2gBB1MyHiisSDdp8SQvgw -V -pk public.pem`  
+Some options such as Verifying tokens require additional parameters/files to be provided (here providing the Public Key in PEM format):
+`$ python3 jwt_tool.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.aqNCvShlNT9jBFTPBpHDbt2gBB1MyHiisSDdp8SQvgw -V -pk public.pem`
 
 ### Sending tokens to a web application
-All modes now allow for sending the token directly to an application.  
-You need to specify:  
+All modes now allow for sending the token directly to an application.
+You need to specify:
 * target URL (-t)
 * a request header (-rh) or request cookies (-rc) that are needed by the application (***at least one must contain the token***)
 * (optional) any POST data (where the request is a POST)
-* (optional) any additional jwt_tool options, such as modes or tampering/injection options  
-* (optional) a *canary value* (-cv) - a text value you expect to see in a successful use of the token (e.g. "Welcome, ticarpi")  
-An example request might look like this (using scanning mode for forced-errors):  
-`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -rh "Origin: null" -cv "Welcome" -M er` 
+* (optional) any additional jwt_tool options, such as modes or tampering/injection options
+* (optional) a *canary value* (-cv) - a text value you expect to see in a successful use of the token (e.g. "Welcome, ticarpi")
+An example request might look like this (using scanning mode for forced-errors):
+`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -rh "Origin: null" -cv "Welcome" -M er`
 
-Various responses from the request are displayed:  
+Various responses from the request are displayed:
 * Response code
 * Response size
 * Unique request tracking ID (for use with logging)
@@ -100,40 +146,40 @@ Various responses from the request are displayed:
 
 ## Common Workflow
 
-Here is a quick run-through of a basic assessment of a JWT implementation. If no success with these options then dig deeper into other modes and options to hunt for new vulnerabilities (or zero-days!).  
+Here is a quick run-through of a basic assessment of a JWT implementation. If no success with these options then dig deeper into other modes and options to hunt for new vulnerabilities (or zero-days!).
 
-### Recon:  
-Read the token value to get a feel for the claims/values expected in the application:  
-`$ python3 jwt_tool.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.aqNCvShlNT9jBFTPBpHDbt2gBB1MyHiisSDdp8SQvgw`  
+### Recon:
+Read the token value to get a feel for the claims/values expected in the application:
+`$ python3 jwt_tool.py eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.aqNCvShlNT9jBFTPBpHDbt2gBB1MyHiisSDdp8SQvgw`
 
 ### Scanning:
-Run a ***Playbook Scan*** using the provided token directly against the application to hunt for common misconfigurations:  
-`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -M pb`  
+Run a ***Playbook Scan*** using the provided token directly against the application to hunt for common misconfigurations:
+`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -M pb`
 
 ### Exploitation:
-If any successful vulnerabilities are found change any relevant claims to try to exploit it (here using the *Inject JWKS* exploit and injecting a new username):  
-`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -X i -I -pc name -pv admin` 
+If any successful vulnerabilities are found change any relevant claims to try to exploit it (here using the *Inject JWKS* exploit and injecting a new username):
+`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -X i -I -pc name -pv admin`
 
 ### Fuzzing:
-Dig deeper by testing for unexpected values and claims to identify unexpected app behaviours, or run attacks on programming logic or token processing:  
-`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -I -hc kid -hv custom_sqli_vectors.txt`  
+Dig deeper by testing for unexpected values and claims to identify unexpected app behaviours, or run attacks on programming logic or token processing:
+`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -I -hc kid -hv custom_sqli_vectors.txt`
 
 ### Review:
-Review any successful exploitation by querying the logs to read more data about the request and :  
-`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -X i -I -pc name -pv admin`   
+Review any successful exploitation by querying the logs to read more data about the request and :
+`$ python3 jwt_tool.py -t https://www.ticarpi.com/ -rc "jwt=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJsb2dpbiI6InRpY2FycGkifQ.bsSwqj2c2uI9n7-ajmi3ixVGhPUiY7jO9SUn9dm15Po;anothercookie=test" -X i -I -pc name -pv admin`
 
 ---
 
 ### Help
 For a list of options call the usage function:
-Some options such as Verifying tokens require additional parameters/files to be provided:  
+Some options such as Verifying tokens require additional parameters/files to be provided:
 `$ python3 jwt_tool.py -h`
 
 **A more detailed user guide can be found on the [wiki page](https://github.com/ticarpi/jwt_tool/wiki/Using-jwt_tool).**
 
 ---
 
-## JWT Attack Playbook - new wiki content!  
+## JWT Attack Playbook - new wiki content!
 ![playbook_logo](https://user-images.githubusercontent.com/57728093/68797806-21f25700-064d-11ea-9baa-c58fb6f75c0b.png)
 
 Head over to the [JWT Attack Playbook](https://github.com/ticarpi/jwt_tool/wiki) for a detailed run-though of what JWTs are, what they do, and a full workflow of how to thoroughly test them for vulnerabilities, common weaknesses and unintended coding errors.
@@ -141,9 +187,9 @@ Head over to the [JWT Attack Playbook](https://github.com/ticarpi/jwt_tool/wiki)
 ---
 
 ## Tips
-**Regex for finding JWTs in Burp Search**  
-*(make sure 'Case sensitive' and 'Regex' options are ticked)*  
-`[= ]eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9._-]*` - url-safe JWT version  
+**Regex for finding JWTs in Burp Search**
+*(make sure 'Case sensitive' and 'Regex' options are ticked)*
+`[= ]eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9._-]*` - url-safe JWT version
 `[= ]eyJ[A-Za-z0-9_\/+-]*\.[A-Za-z0-9._\/+-]*` - all JWT versions (higher possibility of false positives)
 
 ---
@@ -153,9 +199,9 @@ Head over to the [JWT Attack Playbook](https://github.com/ticarpi/jwt_tool/wiki)
 
 * [A great intro to JWTs - https://jwt.io/introduction/](https://jwt.io/introduction/)
 
-* A lot of the initial inspiration for this tool comes from the vulnerabilities discovered by Tim McLean.  
-[Check out his blog on JWT weaknesses here: https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/](https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/)  
+* A lot of the initial inspiration for this tool comes from the vulnerabilities discovered by Tim McLean.
+[Check out his blog on JWT weaknesses here: https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/](https://auth0.com/blog/critical-vulnerabilities-in-json-web-token-libraries/)
 
-* A whole bunch of exercises for testing JWT vulnerabilities are provided by [Pentesterlab (https://www.pentesterlab.com)](https://www.pentesterlab.com). I'd highly recommend a PRO subscription if you are interested in Web App Pentesting.  
+* A whole bunch of exercises for testing JWT vulnerabilities are provided by [Pentesterlab (https://www.pentesterlab.com)](https://www.pentesterlab.com). I'd highly recommend a PRO subscription if you are interested in Web App Pentesting.
 
   *PLEASE NOTE:* This toolkit will solve most of the Pentesterlab JWT exercises in a few seconds when used correctly, however I'd **strongly** encourage you to work through these exercises yourself, working out the structure and the weaknesses. After all, it's all about learning...

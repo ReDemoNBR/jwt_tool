@@ -6,3 +6,6 @@ ignore:
   - fix-state: wont-fix
   # ignore issues that have no fix yet released (action required on upstream provider)
   - fix-state: not-fixed
+  # ignore issues from python packages (upstream problem)
+  - package:
+      type: python

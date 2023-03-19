@@ -1,0 +1,22 @@
+default:
+  image: docker.io/redemonbr/podman-steroids:latest
+
+stages:
+  - lint
+  - build
+  - audit
+  - publish
+
+variables:
+  DOCKER_BUILDKIT:
+    value: 1
+    description: Force container builds to use BuildKit
+  BUILDAH_FORMAT:
+    value: oci
+    description: Format of the image manifest and config data
+  JWT_TOOL_VERSION: 2.2.6
+  PRIVATE_IMAGE_NAME: $CI_REGISTRY/$CI_PROJECT_PATH/$CI_COMMIT_REF_NAME
+  # yamllint disable-line rule:line-length
+  BUILD_PLATFORM: linux/amd64,linux/386,linux/arm/v5,linux/arm/v7,linux/arm64/v8,linux/ppc64le,linux/s390x
+  REMOTE_IMAGE_REPO: $OCI_REGISTRY/$REPOSITORY_NAME
+  PUBLIC_IMAGE_NAME: redemonbr/jwt-tool
